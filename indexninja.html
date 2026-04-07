@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ninja João Virtual</title>
+    <link rel="stylesheet" href="style_pou.css">
+</head>
+<body>
+
+    <div id="status-container">
+        <div class="bar-wrap"><span>FOME</span><div class="bar"><div id="fome-fill" class="fill"></div></div></div>
+        <div class="bar-wrap"><span>ENERGIA</span><div class="bar"><div id="energia-fill" class="fill"></div></div></div>
+        <div class="bar-wrap"><span>TREINO</span><div class="bar"><div id="treino-fill" class="fill"></div></div></div>
+    </div>
+
+    <div id="game-screen">
+        <div id="ninja-container">
+            <div id="ninja-emoji">🥷</div>
+            <div id="ninja-name">Ninja João</div>
+        </div>
+    </div>
+
+    <div id="actions">
+        <button onclick="alimentar()">🍎 COMER</button>
+        <button onclick="dormir()">💤 DORMIR</button>
+        <button onclick="treinar()">⚔️ TREINAR</button>
+    </div>
+
+    <script src="script_pou.js"></script>
+</body>
+</html>
