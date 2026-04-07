@@ -1,6 +1,6 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
-// 1. MAPA DO LABIRINTO
+// 1. MAPA DO LABIRINTO (1=Parede, 2=Objeto, 3=João, 4=Saída)
 const MAPA = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
@@ -15,156 +15,250 @@ const MAPA = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
+// Configurações
 const TAMANHO_CELULA = 2;
-const VELOCIDADE = 0.12;
+const VELOCIDADE_NINJA = 0.15;
 const TECLAS = {};
 let score = 0;
 let tempoInicial = Date.now();
 const objetosNoCenario = [];
 let totalObjetos = 0;
+let joaoNinja; // O modelo do personagem
+let nomePlayer; // O elemento HTML do nome
 
-let yaw = 0; 
-let pitch = 0;
-
-// 2. CONFIGURAÇÃO DA CENA
+// 2. SETUP DA CENA (THREE.JS)
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x444444);
-
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.rotation.order = 'YXZ';
-
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.2);
+// Luzes
+const luzAmbiente = new THREE.AmbientLight(0xffffff, 0.8);
 scene.add(luzAmbiente);
-
 const luzSol = new THREE.DirectionalLight(0xffffff, 1.0);
-luzSol.position.set(5, 10, 5);
+luzSol.position.set(10, 15, 10);
+luzSol.castShadow = true;
 scene.add(luzSol);
 
-// 3. CONSTRUÇÃO DO MUNDO
-const geoParede = new THREE.BoxGeometry(TAMANHO_CELULA, 4, TAMANHO_CELULA);
-const matParede = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
+// Carregador de Texturas
+const textureLoader = new THREE.TextureLoader();
+// USANDO TEXTURAS DE EXEMPLO DO THREE.JS (Tijolos e Chão)
+const texParede = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/brick_diffuse.jpg');
+const texChao = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/hardwood2_diffuse.jpg');
+
+// 3. CONSTRUÇÃO DO MUNDO (Com Texturas)
+const geoParede = new THREE.BoxGeometry(TAMANHO_CELULA, 3.5, TAMANHO_CELULA);
+const matParede = new THREE.MeshStandardMaterial({ map: texParede }); // Textura de Tijolos
 const geoObjeto = new THREE.OctahedronGeometry(0.5); 
-const matObjeto = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x00ff00 });
+const matObjeto = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x003300 });
 
 MAPA.forEach((linha, r) => {
     linha.forEach((valor, c) => {
         const x = c * TAMANHO_CELULA;
         const z = r * TAMANHO_CELULA;
-        if (valor === 1) {
-            const parede = new THREE.Mesh(geoParede, matParede);
-            parede.position.set(x, 2, z);
-            scene.add(parede);
-        } else if (valor === 2) {
+        if (valor === 1) { // Parede
+            const p = new THREE.Mesh(geoParede, matParede);
+            p.position.set(x, 1.75, z);
+            p.castShadow = true;
+            p.receiveShadow = true;
+            scene.add(p);
+        } else if (valor === 2) { // Diamantes
             const obj = new THREE.Mesh(geoObjeto, matObjeto);
             obj.position.set(x, 1, z);
             scene.add(obj);
             objetosNoCenario.push(obj);
             totalObjetos++;
-        } else if (valor === 3) {
-            camera.position.set(x, 1.6, z);
         }
     });
 });
 
-const chao = new THREE.Mesh(
-    new THREE.PlaneGeometry(100, 100),
-    new THREE.MeshStandardMaterial({ color: 0x333333 })
-);
+// Chão (Com textura)
+const geoChao = new THREE.PlaneGeometry(100, 100);
+const matChao = new THREE.MeshStandardMaterial({ map: texChao });
+const chao = new THREE.Mesh(geoChao, matChao);
 chao.rotation.x = -Math.PI / 2;
+chao.receiveShadow = true;
 scene.add(chao);
 
-// 4. CONTROLES (PC e CELULAR)
+// Teto (Céu Simplificado)
+const geoTeto = new THREE.PlaneGeometry(100, 100);
+const matTeto = new THREE.MeshBasicMaterial({ color: 0x87CEEB }); // Azul Céu
+const teto = new THREE.Mesh(geoTeto, matTeto);
+teto.position.y = 3.5;
+teto.rotation.x = Math.PI / 2;
+scene.add(teto);
 
-// PC: Mouse para girar
-window.addEventListener('mousedown', () => {
-    if(!/Android|iPhone/i.test(navigator.userAgent)) document.body.requestPointerLock();
-});
+// 4. CRIAR O NINJA JOÃO
+// Um corpo simples: Corpo azul (veste), cabeça (pele), faixa preta
+const materialJoãoBody = new THREE.MeshStandardMaterial({ color: 0x1e90ff });
+const materialJoãoHead = new THREE.MeshStandardMaterial({ color: 0xffe4b5 });
+const materialJoãoFaixa = new THREE.MeshStandardMaterial({ color: 0x000000 });
 
-window.addEventListener('mousemove', (e) => {
-    if (document.pointerLockElement === document.body) {
-        yaw -= e.movementX * 0.003;
-        pitch -= e.movementY * 0.003;
-        pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch));
-        camera.rotation.set(pitch, yaw, 0);
+joaoNinja = new THREE.Group();
+// Corpo
+const corpo = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.4), materialJoãoBody);
+corpo.position.y = 0.6;
+corpo.castShadow = true;
+joaoNinja.add(corpo);
+// Cabeça
+const cabeca = new THREE.Mesh(new THREE.SphereGeometry(0.3), materialJoãoHead);
+cabeca.position.y = 1.35;
+cabeca.castShadow = true;
+joaoNinja.add(cabeca);
+// Faixa
+const faixa = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.05, 0.65), materialJoãoFaixa);
+faixa.position.y = 1.4;
+joaoNinja.add(faixa);
+
+// Posição Inicial
+joaoNinja.position.set(TAMANHO_CELULA * 1, 0, TAMANHO_CELULA * 1); // MATRIZ [1][1]
+scene.add(joaoNinja);
+
+// Adicionar Nome "João" acima da cabeça (HTML)
+nomePlayer = document.createElement('div');
+nomePlayer.className = 'player-label';
+nomePlayer.textContent = 'João';
+document.body.appendChild(nomePlayer);
+
+// 5. COMBATE E AÇÕES
+// Atacar de Espada ( WASD / Teclas Direcionais + ESPAÇO )
+function atacarEspada() {
+    // Espada é um ataque de curto alcance (raio invisível na frente do João)
+    const raycaster = new THREE.Raycaster();
+    const direcao = new THREE.Vector3(0, 0, 1); // Frente do João
+    direcao.applyQuaternion(joaoNinja.quaternion);
+    raycaster.set(joaoNinja.position.clone().add(new THREE.Vector3(0, 1, 0)), direcao);
+
+    const intersects = raycaster.intersectObjects(objetosNoCenario);
+    if (intersects.length > 0 && intersects[0].distance < 1.5) { // Distância curta
+        derrubarAlvo(intersects[0].object);
     }
-});
+}
 
-// CELULAR: Toque para girar
-let touchX = null;
-let touchY = null;
-window.addEventListener('touchstart', (e) => {
-    touchX = e.touches[0].clientX;
-    touchY = e.touches[0].clientY;
-}, { passive: false });
+// Atacar de Shuriken ( Click na tela / Botão Shuriken )
+function atacarShuriken() {
+    // Shuriken é um ataque de longo alcance (direção que a câmera olha)
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 
-window.addEventListener('touchmove', (e) => {
-    if (touchX !== null && touchY !== null) {
-        const dx = e.touches[0].clientX - touchX;
-        const dy = e.touches[0].clientY - touchY;
-        yaw -= dx * 0.005;
-        pitch -= dy * 0.005;
-        pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch));
-        camera.rotation.set(pitch, yaw, 0);
+    const intersects = raycaster.intersectObjects(objetosNoCenario);
+    if (intersects.length > 0 && intersects[0].distance < 15) { // Distância longa
+        derrubarAlvo(intersects[0].object);
     }
-    touchX = e.touches[0].clientX;
-    touchY = e.touches[0].clientY;
-}, { passive: false });
+}
 
-// 5. MOVIMENTAÇÃO (Teclado)
+function derrubarAlvo(alvo) {
+    if (alvo.visible) {
+        alvo.visible = false;
+        score++;
+        document.getElementById('score').innerText = score;
+        if (score === totalObjetos) alert("Você derrubou todos os alvos, João!");
+    }
+}
+
+// 6. MOVIMENTAÇÃO (PC e CELULAR)
 window.addEventListener('keydown', (e) => TECLAS[e.code] = true);
 window.addEventListener('keyup', (e) => TECLAS[e.code] = false);
 
-// Função para botões na tela (Celular)
-window.configurarBotoes = (id, tecla) => {
+// Configurar botões mobile (Movimento e Ação)
+function configurarMobile(id, tecla, acao) {
     const btn = document.getElementById(id);
-    if(btn) {
+    if (!btn) return;
+    if (tecla) {
         btn.addEventListener('touchstart', (e) => { e.preventDefault(); TECLAS[tecla] = true; });
         btn.addEventListener('touchend', (e) => { e.preventDefault(); TECLAS[tecla] = false; });
+    } else if (acao) {
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); acao(); });
     }
-};
+}
 
 function podeMover(nx, nz) {
     const col = Math.round(nx / TAMANHO_CELULA);
     const row = Math.round(nz / TAMANHO_CELULA);
-    return MAPA[row] && MAPA[row][col] !== 1;
+    if (!MAPA[row] || MAPA[row][col] === undefined) return false;
+    return MAPA[row][col] !== 1; // 1 é parede
 }
 
 function atualizarControles() {
-    const dir = new THREE.Vector3();
-    camera.getWorldDirection(dir);
-    dir.y = 0; dir.normalize();
-    const lat = new THREE.Vector3().crossVectors(camera.up, dir).normalize();
+    // 6a. Movimento e Rotação do João
+    let girar = 0;
+    if (TECLAS['KeyW']) { /* Anda pra frente (já tratado) */ }
+    if (TECLAS['KeyA']) girar = 0.05;
+    if (TECLAS['KeyD']) girar = -0.05;
+    
+    if (girar !== 0) joaoNinja.rotation.y += girar;
 
-    let dx = 0; let dz = 0;
-    if (TECLAS['KeyW'] || TECLAS['ArrowUp']) { dx += dir.x * VELOCIDADE; dz += dir.z * VELOCIDADE; }
-    if (TECLAS['KeyS'] || TECLAS['ArrowDown']) { dx -= dir.x * VELOCIDADE; dz -= dir.z * VELOCIDADE; }
-    if (TECLAS['KeyA'] || TECLAS['ArrowLeft']) { dx += lat.x * VELOCIDADE; dz += lat.z * VELOCIDADE; }
-    if (TECLAS['KeyD'] || TECLAS['ArrowRight']) { dx -= lat.x * VELOCIDADE; dz -= lat.z * VELOCIDADE; }
+    // 6b. Andar para frente/trás (Segue a rotação do João)
+    const direcao = new THREE.Vector3(0, 0, 1);
+    direcao.applyQuaternion(joaoNinja.quaternion);
+    direcao.normalize();
 
-    if (podeMover(camera.position.x + dx, camera.position.z)) camera.position.x += dx;
-    if (podeMover(camera.position.x, camera.position.z + dz)) camera.position.z += dz;
+    let dz = 0;
+    if (TECLAS['KeyW'] || TECLAS['ArrowUp']) dz = VELOCIDADE_NINJA;
+    if (TECLAS['KeyS'] || TECLAS['ArrowDown']) dz = -VELOCIDADE_NINJA;
+
+    if (dz !== 0) {
+        const nx = joaoNinja.position.x + direcao.x * dz;
+        const nz = joaoNinja.position.z + direcao.z * dz;
+        if (podeMover(nx, nz)) {
+            joaoNinja.position.x = nx;
+            joaoNinja.position.z = nz;
+        }
+    }
+
+    // 6c. Atualizar Câmera (Terceira Pessoa)
+    const offset = new THREE.Vector3(0, 1.8, -TAMANHO_CELULA * 1.5); // Câmera atrás e acima
+    offset.applyQuaternion(joaoNinja.quaternion);
+    camera.position.copy(joaoNinja.position).add(offset);
+    camera.lookAt(joaoNinja.position.clone().add(new THREE.Vector3(0, 1, 0))); // Olha pro peito do João
+
+    // 6d. Atualizar Nome (HTML segue o João)
+    if (nomePlayer) {
+        const tempV = joaoNinja.position.clone();
+        tempV.y += 1.8; // Acima da cabeça
+        tempV.project(camera);
+        const x = (tempV.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-tempV.y * 0.5 + 0.5) * window.innerHeight;
+        nomePlayer.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+    }
 }
 
-// 6. LOOP FINAL
+// 7. LOOP FINAL
 function animate() {
     requestAnimationFrame(animate);
     atualizarControles();
+    
+    // Animações dos Alvos (Diamantes verdes girando)
     objetosNoCenario.forEach(obj => { if (obj.visible) obj.rotation.y += 0.05; });
+    
     const segs = Math.floor((Date.now() - tempoInicial) / 1000);
     document.getElementById('timer').innerText = segs + "s";
+    
     renderer.render(scene, camera);
 }
 
-// Inicializar botões se existirem
+// 8. INICIALIZAÇÕES
+// Teclado (Combate)
+window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') atacarEspada();
+});
+window.addEventListener('mousedown', atacarShuriken); // Clique = Shuriken
+
+// Celular (Toque)
 setTimeout(() => {
-    ['btn-up', 'btn-down', 'btn-left', 'btn-right'].forEach(id => {
-        const t = id === 'btn-up' ? 'KeyW' : id === 'btn-down' ? 'KeyS' : id === 'btn-left' ? 'KeyA' : 'KeyD';
-        window.configurarBotoes(id, t);
-    });
+    const mapeamentoMov = [['btn-up', 'KeyW'], ['btn-down', 'KeyS'], ['btn-left', 'KeyA'], ['btn-right', 'KeyD']];
+    mapeamentoMov.forEach(pair => configurarMobile(pair[0], pair[1], null));
+    configurarMobile('btn-sword', null, atacarEspada);
+    configurarMobile('btn-shuriken', null, atacarShuriken);
 }, 500);
+
+// Ajuste automático de janela
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 animate();
