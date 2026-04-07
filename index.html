@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ninja João 3D - O Labirinto</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
+        canvas { display: block; }
+        
+        /* Interface do Jogo */
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            user-select: none;
+            pointer-events: none;
+        }
+        .stats { font-size: 1.2rem; text-shadow: 2px 2px #000; }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <div class="stats">Objetos: <span id="score">0</span></div>
+        <div class="stats">Tempo: <span id="timer">00:00</span></div>
+        <div style="margin-top: 5px; font-size: 0.8rem;">Espaço: Espada | Click: Estrela</div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module" src="game.js"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registrado!', reg))
+                    .catch(err => console.log('Erro no SW', err));
+            });
+        }
+    </script>
+</body>
+</html>
