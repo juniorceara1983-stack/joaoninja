@@ -1,11 +1,19 @@
+
+/* 1. CONFIGURAÇÕES GERAIS DA TELA */
 body { 
     margin: 0; 
     overflow: hidden; 
     background-color: #000; 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     user-select: none;
+    touch-action: none; /* Impede o zoom acidental no celular */
 }
 
+canvas {
+    display: block;
+}
+
+/* 2. INTERFACE DE STATUS (SCORE E TEMPO) */
 #ui {
     position: absolute;
     top: 20px;
@@ -22,6 +30,90 @@ body {
     margin-bottom: 5px;
 }
 
-canvas {
-    display: block;
+/* 3. NOME DO JOÃO ACIMA DA CABEÇA */
+.player-label {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.7); 
+    color: #ffffff; 
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid #00ff00; /* Borda verde ninja */
+    z-index: 50;
+    transform: translate(-50%, -50%); /* Centraliza o nome */
+}
+
+/* 4. CONTROLES DE MOVIMENTO (LADO ESQUERDO) */
+#controls { 
+    position: absolute; 
+    bottom: 30px; 
+    left: 20px; 
+    display: grid; 
+    grid-template-columns: 65px 65px 65px; 
+    gap: 10px; 
+    z-index: 110; 
+}
+
+.btn { 
+    width: 65px; 
+    height: 65px; 
+    background: rgba(255, 255, 255, 0.2); 
+    border: 2px solid rgba(255, 255, 255, 0.8); 
+    border-radius: 12px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: white; 
+    font-weight: bold; 
+    font-size: 20px;
+}
+
+#btn-up { grid-column: 2; }
+#btn-left { grid-column: 1; }
+#btn-down { grid-column: 2; }
+#btn-right { grid-column: 3; }
+
+/* 5. CONTROLES DE AÇÃO (LADO DIREITO - ESPADA E SHURIKEN) */
+#actions { 
+    position: absolute; 
+    bottom: 30px; 
+    right: 20px; 
+    display: flex; 
+    flex-direction: row;
+    gap: 20px; 
+    z-index: 110; 
+}
+
+.action-btn { 
+    width: 80px; 
+    height: 80px; 
+    border-radius: 50%; 
+    color: white; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+    font-size: 11px; 
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    text-transform: uppercase;
+}
+
+#btn-sword { 
+    background: rgba(255, 0, 0, 0.6); 
+    border: 3px solid #ff0000; 
+}
+
+#btn-shuriken { 
+    background: rgba(0, 0, 255, 0.6); 
+    border: 3px solid #0000ff; 
+}
+
+/* Efeito visual ao tocar nos botões */
+.btn:active, .action-btn:active {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0.95);
 }
