@@ -1,44 +1,62 @@
 let status = {
-    fome: 100,
-    energia: 100,
-    treino: 0
+    fome: 80,
+    energia: 90,
+    treino: 10,
+    moedas: 0
 };
 
 function atualizarInterface() {
     document.getElementById('fome-fill').style.width = status.fome + "%";
     document.getElementById('energia-fill').style.width = status.energia + "%";
     document.getElementById('treino-fill').style.width = status.treino + "%";
+    // Atualiza o nome para mostrar as moedas
+    document.getElementById('ninja-name').innerText = `Ninja João | 💰 ${status.moedas}`;
 }
 
-// O status cai com o tempo (Gasto fixo)
+// Redução automática de status
 setInterval(() => {
-    status.fome = Math.max(0, status.fome - 1);
-    status.energia = Math.max(0, status.energia - 0.5);
+    status.fome = Math.max(0, status.fome - 2);
+    status.energia = Math.max(0, status.energia - 1);
     atualizarInterface();
-    if(status.fome < 20) alert("João está com fome!");
-}, 3000);
+}, 5000);
 
 function alimentar() {
-    status.fome = Math.min(100, status.fome + 20);
-    animarNinja();
-    atualizarInterface();
-}
-
-function treinar() {
-    if(status.energia > 10) {
-        status.treino = Math.min(100, status.treino + 5);
-        status.energia -= 10;
-        animarNinja();
-        atualizarInterface();
-    } else {
-        alert("João está exausto!");
+    if(status.fome < 100) {
+        status.fome = Math.min(100, status.fome + 15);
+        reagir("🍎", "😋");
     }
 }
 
-function animarNinja() {
+function dormir() {
+    if(status.energia < 100) {
+        status.energia = Math.min(100, status.energia + 30);
+        reagir("💤", "😴");
+    }
+}
+
+function treinar() {
+    if(status.energia > 20) {
+        status.treino = Math.min(100, status.treino + 10);
+        status.energia -= 20;
+        status.moedas += 5; // Treinar gera "faturamento"
+        reagir("⚔️", "🔥");
+    } else {
+        alert("João está sem energia para treinar!");
+    }
+}
+
+function reagir(emojiAcao, emojiRosto) {
     const el = document.getElementById('ninja-emoji');
-    el.style.transform = "scale(1.3)";
-    setTimeout(() => el.style.transform = "scale(1)", 200);
+    const original = "🥷";
+    
+    el.innerText = emojiRosto;
+    el.style.transform = "scale(1.4) rotate(10deg)";
+    
+    setTimeout(() => {
+        el.innerText = original;
+        el.style.transform = "scale(1) rotate(0deg)";
+        atualizarInterface();
+    }, 8000);
 }
 
 atualizarInterface();
