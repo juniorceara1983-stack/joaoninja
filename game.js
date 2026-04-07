@@ -23,13 +23,12 @@ let tempoInicial = Date.now();
 const objetosNoCenario = [];
 let totalObjetos = 0;
 
-// Variáveis de visão
 let yaw = 0; 
 let pitch = 0;
 
 // 2. CONFIGURAÇÃO DA CENA
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x444444); // Fundo cinza para ver tudo
+scene.background = new THREE.Color(0x444444);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.rotation.order = 'YXZ';
@@ -38,17 +37,16 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// --- LUZES FORTES (PARA NÃO FICAR ESCURO) ---
-const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.2); // Luz em tudo
+const luzAmbiente = new THREE.AmbientLight(0xffffff, 1.2);
 scene.add(luzAmbiente);
 
 const luzSol = new THREE.DirectionalLight(0xffffff, 1.0);
 luzSol.position.set(5, 10, 5);
 scene.add(luzSol);
 
-// 3. CONSTRUÇÃO DAS PAREDES E CHÃO
+// 3. CONSTRUÇÃO DO MUNDO
 const geoParede = new THREE.BoxGeometry(TAMANHO_CELULA, 4, TAMANHO_CELULA);
-const matParede = new THREE.MeshStandardMaterial({ color: 0xaaaaaa }); // Paredes claras
+const matParede = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
 const geoObjeto = new THREE.OctahedronGeometry(0.5); 
 const matObjeto = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x00ff00 });
 
@@ -79,9 +77,11 @@ const chao = new THREE.Mesh(
 chao.rotation.x = -Math.PI / 2;
 scene.add(chao);
 
-// 4. CONTROLES DE MOUSE (PARA GIRAR)
+// 4. CONTROLES (PC e CELULAR)
+
+// PC: Mouse para girar
 window.addEventListener('mousedown', () => {
-    document.body.requestPointerLock();
+    if(!/Android|iPhone/i.test(navigator.userAgent)) document.body.requestPointerLock();
 });
 
 window.addEventListener('mousemove', (e) => {
@@ -93,9 +93,39 @@ window.addEventListener('mousemove', (e) => {
     }
 });
 
-// 5. MOVIMENTAÇÃO
+// CELULAR: Toque para girar
+let touchX = null;
+let touchY = null;
+window.addEventListener('touchstart', (e) => {
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+}, { passive: false });
+
+window.addEventListener('touchmove', (e) => {
+    if (touchX !== null && touchY !== null) {
+        const dx = e.touches[0].clientX - touchX;
+        const dy = e.touches[0].clientY - touchY;
+        yaw -= dx * 0.005;
+        pitch -= dy * 0.005;
+        pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch));
+        camera.rotation.set(pitch, yaw, 0);
+    }
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+}, { passive: false });
+
+// 5. MOVIMENTAÇÃO (Teclado)
 window.addEventListener('keydown', (e) => TECLAS[e.code] = true);
 window.addEventListener('keyup', (e) => TECLAS[e.code] = false);
+
+// Função para botões na tela (Celular)
+window.configurarBotoes = (id, tecla) => {
+    const btn = document.getElementById(id);
+    if(btn) {
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); TECLAS[tecla] = true; });
+        btn.addEventListener('touchend', (e) => { e.preventDefault(); TECLAS[tecla] = false; });
+    }
+};
 
 function podeMover(nx, nz) {
     const col = Math.round(nx / TAMANHO_CELULA);
@@ -123,15 +153,18 @@ function atualizarControles() {
 function animate() {
     requestAnimationFrame(animate);
     atualizarControles();
-    
-    // Girar diamantes
     objetosNoCenario.forEach(obj => { if (obj.visible) obj.rotation.y += 0.05; });
-
-    // HUD
     const segs = Math.floor((Date.now() - tempoInicial) / 1000);
     document.getElementById('timer').innerText = segs + "s";
-    
     renderer.render(scene, camera);
 }
+
+// Inicializar botões se existirem
+setTimeout(() => {
+    ['btn-up', 'btn-down', 'btn-left', 'btn-right'].forEach(id => {
+        const t = id === 'btn-up' ? 'KeyW' : id === 'btn-down' ? 'KeyS' : id === 'btn-left' ? 'KeyA' : 'KeyD';
+        window.configurarBotoes(id, t);
+    });
+}, 500);
 
 animate();
