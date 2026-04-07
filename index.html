@@ -10,46 +10,71 @@
     <link rel="apple-touch-icon" href="assets/icon-192.png">
 
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #000; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
         canvas { display: block; }
         
-        /* Interface do Jogo */
+        /* Interface do Jogo (HUD) */
         #ui {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
+            top: 20px;
+            left: 20px;
+            color: #00ff00; /* Verde Ninja */
             user-select: none;
             pointer-events: none;
+            z-index: 10;
         }
-        .stats { font-size: 1.2rem; text-shadow: 2px 2px #000; }
+        .stats { 
+            font-size: 1.5rem; 
+            font-weight: bold;
+            text-shadow: 2px 2px 4px #000; 
+            margin-bottom: 5px;
+        }
+        #instrucoes {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 0.9rem;
+            text-shadow: 1px 1px 2px #000;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
     <div id="ui">
         <div class="stats">Objetos: <span id="score">0</span></div>
-        <div class="stats">Tempo: <span id="timer">00:00</span></div>
-        <div style="margin-top: 5px; font-size: 0.8rem;">Espaço: Espada | Click: Estrela</div>
+        <div class="stats">Tempo: <span id="timer">0s</span></div>
+    </div>
+
+    <div id="instrucoes">
+        CLIQUE NA TELA PARA ATIVAR A CÂMERA <br>
+        WASD: Mover | MOUSE: Olhar | CLIQUE: Atacar
     </div>
 
     <script type="importmap">
         {
             "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
             }
         }
     </script>
 
-    <script type="module" src="game.js"></script>
+    <script type="module" src="game.js?v=2"></script>
 
     <script>
+        // Registro do Service Worker para o PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW registrado!', reg))
-                    .catch(err => console.log('Erro no SW', err));
+                    .then(reg => console.log('PWA: Sistema pronto!'))
+                    .catch(err => console.log('PWA: Erro no registro', err));
             });
         }
     </script>
