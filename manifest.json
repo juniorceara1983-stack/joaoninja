@@ -1,0 +1,21 @@
+{
+  "short_name": "JoaoNinja",
+  "name": "João Ninja: O Labirinto 3D",
+  "description": "Ajude o Ninja João a atravessar o labirinto!",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/616/616430.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/616/616430.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505"
+}
