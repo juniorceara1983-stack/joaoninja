@@ -4,47 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ninja João 3D</title>
+    <link rel="manifest" href="manifest.json">
     <style>
-        body { margin: 0; overflow: hidden; background: #000; touch-action: none; }
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: sans-serif; }
+        
+        /* Interface (HUD) */
         #ui { position: absolute; top: 10px; left: 10px; color: #00ff00; z-index: 10; pointer-events: none; }
         
-        /* Controles de Toque */
-        #controls {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            display: grid;
-            grid-template-columns: 60px 60px 60px;
-            gap: 10px;
-            z-index: 20;
-        }
-        .btn {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            user-select: none;
-        }
-        #btn-up { grid-column: 2; }
-        #btn-left { grid-column: 1; }
-        #btn-down { grid-column: 2; }
-        #btn-right { grid-column: 3; }
-        #btn-attack {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 0, 0, 0.3);
-            border-radius: 50%;
-            z-index: 20;
-        }
+        /* Controles de Movimento (Esquerda) */
+        #controls { position: absolute; bottom: 20px; left: 20px; display: grid; grid-template-columns: 60px 60px 60px; gap: 10px; z-index: 20; }
+        .btn { width: 60px; height: 60px; background: rgba(255, 255, 255, 0.2); border: 2px solid white; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; user-select: none; }
+        #btn-up { grid-column: 2; } #btn-left { grid-column: 1; } #btn-down { grid-column: 2; } #btn-right { grid-column: 3; }
+        
+        /* Controles de Ação (Direita) */
+        #actions { position: absolute; bottom: 20px; right: 20px; display: flex; gap: 15px; z-index: 20; }
+        .action-btn { width: 70px; height: 70px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; user-select: none; }
+        #btn-sword { background: rgba(255, 0, 0, 0.4); border: 2px solid #ff4444; }
+        #btn-shuriken { background: rgba(0, 0, 255, 0.4); border: 2px solid #4444ff; }
     </style>
 </head>
 <body>
@@ -59,11 +35,15 @@
         <div class="btn" id="btn-down">S</div>
         <div class="btn" id="btn-right">D</div>
     </div>
-    <div class="btn" id="btn-attack">ATACAR</div>
+
+    <div id="actions">
+        <div class="action-btn" id="btn-sword">ESPADA<br>(Espaço)</div>
+        <div class="action-btn" id="btn-shuriken">SHURIKEN<br>(Click)</div>
+    </div>
 
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
-    <script type="module" src="game.js?v=3"></script>
+    <script type="module" src="game.js?v=6"></script>
 </body>
 </html>
