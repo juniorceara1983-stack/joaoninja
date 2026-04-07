@@ -1,7 +1,10 @@
 body {
     margin: 0;
-    background: #87CEEB; /* Céu azul */
-    font-family: Arial, sans-serif;
+    /* Imagem de um interior de Dojo Japonês */
+    background-image: url('https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=1000&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -9,17 +12,18 @@ body {
 }
 
 #status-container {
-    padding: 20px;
-    background: rgba(255,255,255,0.8);
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.7); /* Fundo escuro para destacar as barras */
+    border-bottom: 2px solid #00ff00;
 }
 
-.bar-wrap { margin-bottom: 10px; font-weight: bold; font-size: 12px; }
-.bar { width: 100%; height: 20px; background: #ddd; border-radius: 10px; overflow: hidden; }
-.fill { height: 100%; width: 100%; transition: width 0.3s; }
+.bar-wrap { margin-bottom: 8px; color: white; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px black; }
+.bar { width: 100%; height: 18px; background: #333; border-radius: 9px; border: 1px solid #555; overflow: hidden; }
+.fill { height: 100%; transition: width 0.3s ease-in-out; }
 
-#fome-fill { background: #ff4444; }
-#energia-fill { background: #ffbb33; }
-#treino-fill { background: #00C851; }
+#fome-fill { background: linear-gradient(90deg, #ff4b2b, #ff416c); }
+#energia-fill { background: linear-gradient(90deg, #f8ff00, #f8ff00); }
+#treino-fill { background: linear-gradient(90deg, #00f260, #0575e6); }
 
 #game-screen {
     flex-grow: 1;
@@ -29,20 +33,46 @@ body {
     flex-direction: column;
 }
 
-#ninja-emoji { font-size: 100px; transition: transform 0.2s; }
-#ninja-name { font-weight: bold; margin-top: 10px; background: #000; color: #fff; padding: 5px 15px; border-radius: 20px; }
+#ninja-emoji { 
+    font-size: 120px; 
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
 
+#ninja-name { 
+    font-weight: bold; 
+    margin-top: 15px; 
+    background: #00ff00; 
+    color: #000; 
+    padding: 8px 25px; 
+    border-radius: 25px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* CONSERTO DOS BOTÕES */
 #actions {
     display: flex;
-    justify-content: space-around;
-    padding: 20px;
-    background: #333;
+    justify-content: space-evenly;
+    padding: 25px 10px;
+    background: rgba(0, 0, 0, 0.85);
+    border-top: 2px solid #00ff00;
 }
 
 button {
-    padding: 15px;
-    border-radius: 10px;
-    border: none;
+    padding: 12px 18px;
+    border-radius: 12px;
+    border: 2px solid #00ff00;
+    background: #222;
+    color: #00ff00;
     font-weight: bold;
+    font-size: 14px;
     cursor: pointer;
+    transition: all 0.2s;
+    min-width: 90px;
+}
+
+button:active {
+    background: #00ff00;
+    color: #000;
+    transform: scale(0.9);
 }
