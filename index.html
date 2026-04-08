@@ -9,7 +9,19 @@
         body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: sans-serif; }
         
         /* Interface (HUD) */
-        #ui { position: absolute; top: 10px; left: 10px; color: #00ff00; z-index: 10; pointer-events: none; }
+        #ui { position: absolute; top: 10px; left: 10px; color: #00ff00; z-index: 10; pointer-events: none; font-size: 1rem; line-height: 1.6; text-shadow: 0 0 6px #00ff00; background: rgba(0,0,0,0.45); padding: 6px 10px; border-radius: 6px; }
+        
+        /* Overlay de mensagens */
+        #msg-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75);
+            color: #fff; font-size: 2rem; font-weight: bold;
+            justify-content: center; align-items: center; text-align: center;
+            z-index: 100; padding: 20px; box-sizing: border-box;
+            text-shadow: 0 0 12px #00ffaa;
+        }
+        #msg-overlay.visible { display: flex; }
         
         /* Controles de Movimento (Esquerda) */
         #controls { position: absolute; bottom: 20px; left: 20px; display: grid; grid-template-columns: 60px 60px 60px; gap: 10px; z-index: 20; }
@@ -25,9 +37,12 @@
 </head>
 <body>
     <div id="ui">
-        <div>Objetos: <span id="score">0</span></div>
+        <div>Nível: <span id="nivel">1/10</span></div>
+        <div>Objetos: <span id="score">0/0</span></div>
         <div>Tempo: <span id="timer">0s</span></div>
     </div>
+
+    <div id="msg-overlay"></div>
 
     <div id="controls">
         <div class="btn" id="btn-up">W</div>
@@ -44,6 +59,6 @@
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
-    <script type="module" src="game.js?v=6"></script>
+    <script type="module" src="game.js?v=7"></script>
 </body>
 </html>
